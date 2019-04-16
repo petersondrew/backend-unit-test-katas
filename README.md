@@ -1,0 +1,2 @@
+# Beginner Unit Testing Katas for .Net
+These Katas are designed to get beginners up and running writing unit tests quickly. The Katas come with working implementations simply needing tests to cover the acceptance criteria.
