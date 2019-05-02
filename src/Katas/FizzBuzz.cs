@@ -16,6 +16,7 @@
     {
         string Solve(int number);
     }
+
     public class FizzBuzz : IFizzBuzz
     {
         public string Solve(int number)

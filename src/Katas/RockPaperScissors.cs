@@ -2,6 +2,8 @@
 
 namespace Katas
 {
+#pragma warning disable RCS1168 // Parameter name differs from base name.
+
     /* Acceptance Criteria
      * 
      * Create a class that determines the winner of a round of Rock, Paper, Scissors

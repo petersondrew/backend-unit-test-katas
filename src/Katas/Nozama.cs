@@ -9,6 +9,8 @@ using OrderErrors = System.Collections.Generic.IEnumerable<Katas.OrderError>;
 
 namespace Katas
 {
+#pragma warning disable RCS1194 // Implement exception constructors.
+
     /* Acceptance Criteria
      * 
      * Create a class that processes Ecommerce orders
@@ -57,6 +59,7 @@ namespace Katas
     {
         public readonly Guid ShopperId;
         public readonly IShoppingCart Cart;
+
         public Session(Guid shopperId, in IShoppingCart cart)
         {
             ShopperId = shopperId;
@@ -67,6 +70,7 @@ namespace Katas
     public readonly ref struct Order
     {
         public readonly OrderItems Items;
+
         public Order(in OrderItems items)
         {
             Items = items;
@@ -78,12 +82,14 @@ namespace Katas
         public int ItemNumber { get; }
         public int AvailableQuantity { get; }
         public int RequestedQuantity { get; }
+
         public OrderError(int itemNumber, int requestedQuantity, int availableQuantity = 0)
         {
             ItemNumber = itemNumber;
             RequestedQuantity = requestedQuantity;
             AvailableQuantity = availableQuantity;
         }
+
         public override string ToString()
             => $"Item {ItemNumber} was requested with a quantity of {RequestedQuantity}, but only {AvailableQuantity} are available.";
     }
@@ -91,11 +97,13 @@ namespace Katas
     public class OrderException : ApplicationException
     {
         public OrderErrors Errors { get; }
+
         public OrderException(string message = default, OrderErrors errors = default, Exception innerException = default)
             : base(message, innerException)
         {
             Errors = errors;
         }
+
         public override string Message => Errors != null ? string.Join(Environment.NewLine, Errors.Select(e => e.ToString())) : base.Message;
     }
 
@@ -136,14 +144,14 @@ namespace Katas
         {
             if (quantity < 1)
                 throw new ArgumentOutOfRangeException(nameof(quantity), "Cannot add negative items to your cart");
-            _items.AddOrUpdate(itemNumber, quantity, (k, v) => v + quantity);
+            _items.AddOrUpdate(itemNumber, quantity, (_, v) => v + quantity);
         }
 
         public void UpdateQuantity(int itemNumber, int quantity)
         {
             if (quantity < 0)
                 throw new ArgumentOutOfRangeException(nameof(quantity), "Cannot add negative items to your cart");
-            _items.AddOrUpdate(itemNumber, quantity, (k, v) => quantity);
+            _items.AddOrUpdate(itemNumber, quantity, (_, __) => quantity);
         }
 
         public void Remove(int itemNumber)
@@ -162,11 +170,13 @@ namespace Katas
         public class InsufficientInventoryException : ApplicationException
         {
             public OrderError OrderError { get; }
+
             public InsufficientInventoryException(int itemNumber, int requested, int available) : base()
             {
                 OrderError = new OrderError(itemNumber, requested, available);
             }
         }
+
         public class InvalidItemException : ApplicationException
         {
             public InvalidItemException() : base("Invalid item") { }
@@ -178,13 +188,15 @@ namespace Katas
         {
             if (quantity < 0)
                 throw new ArgumentOutOfRangeException(nameof(quantity), "Cannot add negative inventory");
-            _items.AddOrUpdate(itemNumber, quantity, (k, v) => v + quantity);
+
+            _items.AddOrUpdate(itemNumber, quantity, (_, v) => v + quantity);
         }
 
         public void Remove(int itemNumber, int quantity)
         {
             if (quantity < 0)
                 throw new ArgumentOutOfRangeException(nameof(quantity), "Cannot remove negative inventory");
+
             SpinWait.SpinUntil(() =>
             {
                 if (!_items.TryGetValue(itemNumber, out var available))
@@ -221,7 +233,7 @@ namespace Katas
                         errorList.Add(e.OrderError);
                     }
                 }
-                if (errorList.Any())
+                if (errorList.Count > 0)
                 {
                     // Compensating action
                     foreach (var (itemNumber, quantity) in fulfilled)
@@ -232,7 +244,7 @@ namespace Katas
             {
                 errors = errorList;
             }
-            return !errorList.Any();
+            return errorList.Count == 0;
         }
     }
 }

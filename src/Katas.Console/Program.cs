@@ -5,9 +5,9 @@ using static System.Console;
 
 namespace Katas.Console
 {
-    class Program
+    public static class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             var kataArgs = args.Skip(1);
             switch (args[0].ToLower())
@@ -50,7 +50,9 @@ namespace Katas.Console
                     continue;
                 if (Enum.TryParse<Action>(turn[0], true, out var player1)
                     && Enum.TryParse<Action>(turn[1], true, out var player2))
+                {
                     WriteLine(rps.Turn(player1, player2));
+                }
             }
         }
 
