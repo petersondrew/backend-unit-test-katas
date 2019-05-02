@@ -20,6 +20,10 @@ namespace Katas.Console
                 case "roshambo":
                     RockPaperScissors(kataArgs);
                     break;
+                case "nozama":
+                case "ecommerce":
+                    NozamaOrder(kataArgs);
+                    break;
                 default:
                     Error.WriteLine("Unknown Kata");
                     break;
@@ -47,6 +51,43 @@ namespace Katas.Console
                 if (Enum.TryParse<Action>(turn[0], true, out var player1)
                     && Enum.TryParse<Action>(turn[1], true, out var player2))
                     WriteLine(rps.Turn(player1, player2));
+            }
+        }
+
+        private static void NozamaOrder(IEnumerable<string> args)
+        {
+            var cart = new ShoppingCart();
+            var session = new Session(Guid.NewGuid(), cart);
+            var warehouse = new Warehouse();
+            warehouse.Add(1, 2);
+            warehouse.Add(2, 4);
+            var nozama = new Nozama(warehouse);
+            try
+            {
+                if (!args.Any())
+                {
+                    Error.WriteLine("No order specified");
+                    return;
+                }
+                foreach (var arg in args)
+                {
+                    var item = arg.Split(':');
+                    if (item.Length != 2)
+                        continue;
+                    if (int.TryParse(item[0], out var itemNumber) && int.TryParse(item[1], out var quantity))
+                        cart.Add(itemNumber, quantity);
+                }
+                WriteLine(string.Join(", ", cart.Items));
+                nozama.Checkout(session);
+                WriteLine("Order successful");
+            }
+            catch (OrderException e)
+            {
+                Error.WriteLine(e.Message);
+            }
+            catch (Exception e)
+            {
+                Error.WriteLine("Error parsing order: {0}", e);
             }
         }
     }
